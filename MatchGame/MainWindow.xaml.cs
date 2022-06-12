@@ -39,5 +39,26 @@ namespace MatchGame
                 textBlock.Text = animalEmoji;
             }
         }
+
+        private TextBlock previousElement;
+
+        private void TextBlock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TextBlock selectedElement = sender as TextBlock;
+            if (previousElement == null)
+            {
+                previousElement = selectedElement;
+                previousElement.Visibility = Visibility.Hidden;
+            } else if (selectedElement.Text.Equals(previousElement.Text))
+            {
+                previousElement.Visibility = Visibility.Hidden;
+                selectedElement.Visibility = Visibility.Hidden;
+                previousElement = null;
+            } else
+            {
+                previousElement.Visibility = Visibility.Visible;
+                previousElement = null;
+            }
+        }
     }
 }
