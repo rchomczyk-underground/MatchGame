@@ -52,5 +52,9 @@
                    TextWrapping="NoWrap" Text="?" FontSize="36" MouseDown="TextBlock_MouseDown"/>
         <TextBlock Grid.Column="3" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center"
                    TextWrapping="NoWrap" Text="?" FontSize="36" MouseDown="TextBlock_MouseDown"/>
+        <TextBlock x:Name="clockComponent" Grid.Row="4" Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextWrapping="NoWrap" Text="Czas: " FontSize="36" MouseDown="TextBlock_MouseDown">
+            
+        </TextBlock>
     </Grid>
 </Window>

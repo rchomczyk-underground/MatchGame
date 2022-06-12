@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace MatchGame
 {
@@ -11,53 +12,107 @@ namespace MatchGame
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly Random random = new Random();
+        private DispatcherTimer timer;
+        private int elapsedTicks;
+        private int matchedPairs;
+        private TextBlock previousElement;
+
         public MainWindow()
         {
             InitializeComponent();
-            SetUpGame();
+            InitializeGrid();
         }
 
-        private void SetUpGame()
+        private void InitializeClock()
         {
-            List<string> animalEmojis = new List<string>()
+            if (elapsedTicks > 0)
             {
-                "🦊", "🦊",
-                "🦍", "🦍",
-                "🦁", "🦁",
-                "🦝", "🦝",
-                "🦧", "🦧",
-                "🦄", "🦄",
-                "🦌", "🦌",
-                "🐗", "🐗",
-            };
-            Random random = new Random();
-            foreach (TextBlock textBlock in gameGrid.Children.OfType<TextBlock>())
+                elapsedTicks = 0;
+            }
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(.1);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            clockComponent.Text = (++elapsedTicks * .1).ToString("0.0s");
+            if (matchedPairs == 8)
             {
-                int index = random.Next(animalEmojis.Count);
-                string animalEmoji = animalEmojis[index];
-                animalEmojis.RemoveAt(index);
-                textBlock.Text = animalEmoji;
+                timer.Stop();
+                clockComponent.Text = clockComponent.Text + " - " + " Jeszcze raz?";
             }
         }
 
-        private TextBlock previousElement;
+        private void InitializeGrid()
+        {
+            InitializeClock();
+            foreach (TextBlock textBlock in gameGrid.Children.OfType<TextBlock>())
+            {
+                if (textBlock.Visibility != Visibility.Visible)
+                {
+                    textBlock.Visibility = Visibility.Visible;
+                }
+            }
 
+            List<string> emojis = new List<string>()
+            {
+                    "🦊", "🦊",
+                    "🦍", "🦍",
+                    "🦁", "🦁",
+                    "🦝", "🦝",
+                    "🦧", "🦧",
+                    "🦄", "🦄",
+                    "🦌", "🦌",
+                    "🐗", "🐗",
+            };
+            foreach (TextBlock textBlock in gameGrid.Children.OfType<TextBlock>())
+            {
+                int remainingEmojis = emojis.Count;
+                if (remainingEmojis == 0)
+                {
+                    break;
+                }
+                int index = random.Next(emojis.Count);
+                string emoji = emojis[index];
+                emojis.RemoveAt(index);
+                textBlock.Text = emoji;
+            }
+        }
         private void TextBlock_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             TextBlock selectedElement = sender as TextBlock;
-            if (previousElement == null)
+            if (selectedElement.Name.Equals(clockComponent.Name))
             {
-                previousElement = selectedElement;
-                previousElement.Visibility = Visibility.Hidden;
-            } else if (selectedElement.Text.Equals(previousElement.Text))
+                if (matchedPairs == 8)
+                {
+                    elapsedTicks = 0;
+                    matchedPairs = 0;
+                    InitializeGrid();
+                }
+            }
+            else
             {
-                previousElement.Visibility = Visibility.Hidden;
-                selectedElement.Visibility = Visibility.Hidden;
-                previousElement = null;
-            } else
-            {
-                previousElement.Visibility = Visibility.Visible;
-                previousElement = null;
+
+                if (previousElement == null)
+                {
+                    previousElement = selectedElement;
+                    previousElement.Visibility = Visibility.Hidden;
+                }
+                else if (selectedElement.Text.Equals(previousElement.Text))
+                {
+                    previousElement.Visibility = Visibility.Hidden;
+                    selectedElement.Visibility = Visibility.Hidden;
+                    previousElement = null;
+                    matchedPairs++;
+                }
+                else
+                {
+                    previousElement.Visibility = Visibility.Visible;
+                    previousElement = null;
+                }
             }
         }
     }
